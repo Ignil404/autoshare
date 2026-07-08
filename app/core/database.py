@@ -1,0 +1,25 @@
+from collections.abc import Generator
+
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+
+from app.core.config import settings
+
+engine = create_engine(settings.DATABASE_URL)
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+
+
+class Base(DeclarativeBase):
+    metadata = MetaData(schema="autoshare")
+
+
+def get_db() -> Generator[Session, None, None]:
+    db = SessionLocal()
+    try:
+        yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()

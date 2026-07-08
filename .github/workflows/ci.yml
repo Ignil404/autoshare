@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: autoshare
+          POSTGRES_PASSWORD: autoshare
+          POSTGRES_DB: autoshare_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: postgresql://autoshare:autoshare@localhost:5432/autoshare_test
+        run: python -m alembic upgrade head
+
+      - name: Run tests
+        env:
+          DATABASE_URL: postgresql://autoshare:autoshare@localhost:5432/autoshare_test
+          SECRET_KEY: test-secret-key
+          TESTING: "1"
+        run: python -m pytest tests/ -v --tb=short
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install ruff
+
+      - name: Run linter
+        run: ruff check app/ tests/
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: bun install
+
+      - name: Type check
+        working-directory: frontend
+        run: bun run tsc --noEmit
+
+      - name: Build
+        working-directory: frontend
+        env:
+          VITE_API_BASE_URL: http://localhost:8000
+        run: bun run build
