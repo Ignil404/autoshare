@@ -60,7 +60,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -91,7 +91,7 @@ async def log_requests(request: Request, call_next):
 app.include_router(v1_router, prefix="/api/v1")
 
 from app.api.v1.ws import router as ws_router
-app.include_router(ws_router)
+app.include_router(ws_router, prefix="/api/v1")
 
 
 @app.get("/health")

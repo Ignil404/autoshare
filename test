@@ -1,0 +1,48 @@
+   autoshare copy
+ ├╴  alembic
+ ├╴  app
+ │ ├╴  api
+ │ │ ├╴  uploads
+ │ │ ├╴  v1
+ │ │ │ ├╴  __init__.py
+ │ │ │ ├╴  audit_log.py
+ │ │ │ ├╴  auth.py
+ │ │ │ ├╴  bookings.py
+ │ │ │ ├╴  car_photos.py
+ │ │ │ ├╴  cars.py
+ │ │ │ ├╴  clients.py
+ │ │ │ ├╴  discounts.py
+ │ │ │ ├╴  email.py
+ │ │ │ ├╴  logs.py
+ │ │ │ ├╴  maintenance.py
+ │ │ │ ├╴  payments.py
+ │ │ │ ├╴  rentals.py
+ │ │ │ ├╴  reporting.py
+ │ │ │ ├╴  staff.py
+ │ │ │ ├╴  tariffs.py
+ │ │ │ └╴  ws.py
+ │ │ └╴  __init__.py
+ │ ├╴  core
+ │ │ ├╴  __init__.py
+ │ │ ├╴  config.py
+ │ │ ├╴  database.py
+ │ │ ├╴  dependencies.py
+ │ │ └╴  security.py
+ │ ├╴  logs
+ │ ├╴  models
+ │ ├╴  schemas
+ │ ├╴  services
+ │ ├╴  __init__.py
+ │ ├╴  main.py
+ │ └╴  seed.py
+ ├╴  frontend
+ │ ├╴  public
+ │ ├╴  src
+ │ ├╴  AGENTS.md
+ │ ├╴  Dockerfile
+ │ ├╴  bun.lock
+ │ ├╴  bunfig.toml
+ │ ├╴  components.json
+ │ ├╴  eslint.config.js
+ │ ├╴  nginx.conf
+

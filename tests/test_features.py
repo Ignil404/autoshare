@@ -185,5 +185,5 @@ def test_rental_cost_calculation(client, db, seed_client, seed_car, seed_tariff)
     r = client.post(f"/api/v1/rentals/{rental_id}/complete", headers=headers)
     assert r.status_code == 200
     total = r.json()["total_cost"]
-    expected = max(float(seed_tariff.min_charge), float(seed_tariff.rate_active) * 10 + float(seed_tariff.rate_pause) * 5)
+    expected = max(float(seed_tariff.min_charge), float(seed_tariff.rate_active) * 11 + float(seed_tariff.rate_pause) * 5)
     assert abs(total - expected) < 0.01

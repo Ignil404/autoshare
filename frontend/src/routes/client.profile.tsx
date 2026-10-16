@@ -80,22 +80,21 @@ function ClientProfile() {
         <div className="rounded-xl bg-secondary/30 p-3 text-xs text-muted-foreground">Пополнение через банковскую карту. Средства зачисляются мгновенно.</div>
       </div>
 
-      <Tabs defaultValue="payments">
-        <TabsList>
-          <TabsTrigger value="payments">История платежей</TabsTrigger>
-          <TabsTrigger value="security">Безопасность</TabsTrigger>
-        </TabsList>
-        <TabsContent value="payments"><PaymentHistory /></TabsContent>
-        <TabsContent value="security">
-          <div className="rounded-2xl border bg-card p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-secondary/50 text-muted-foreground"><Lock className="h-5 w-5" /></div>
-              <div><div className="font-semibold">Смена пароля</div><div className="text-xs text-muted-foreground">Для изменения введите текущий и новый пароль</div></div>
-            </div>
-            <Button onClick={() => { setPwOpen(true); setPwOld(""); setPwNew(""); }} variant="outline">Изменить пароль</Button>
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold">История платежей</h2>
+        <PaymentHistory />
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold">Безопасность</h2>
+        <div className="rounded-2xl border bg-card p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-secondary/50 text-muted-foreground"><Lock className="h-5 w-5" /></div>
+            <div><div className="font-semibold">Смена пароля</div><div className="text-xs text-muted-foreground">Для изменения введите текущий и новый пароль</div></div>
           </div>
-        </TabsContent>
-      </Tabs>
+          <Button onClick={() => { setPwOpen(true); setPwOld(""); setPwNew(""); }} variant="outline">Изменить пароль</Button>
+        </div>
+      </div>
 
       {!verified && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-5 transition-all hover:shadow-md">
@@ -174,7 +173,7 @@ function PaymentHistory() {
 
 function Row({ icon: Icon, label, value, verified }: { icon: typeof Mail; label: string; value: string; verified?: boolean }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border p-3 transition-all duration-200 hover:bg-secondary/30 hover:shadow-sm">
+    <div className="flex items-center gap-3 rounded-xl border p-3 transition-all duration-300 hover:bg-secondary/30 hover:shadow-sm">
       <div className="grid h-9 w-9 place-items-center rounded-lg bg-secondary/50 text-muted-foreground"><Icon className="h-4 w-4" /></div>
       <div className="min-w-0"><div className="text-xs text-muted-foreground">{label}</div><div className="text-sm font-medium truncate flex items-center gap-1.5">{value}{verified !== undefined && <span className={`text-[10px] ${verified ? "text-green-600" : "text-amber-500"}`}>{verified ? "✓" : "○"}</span>}</div></div>
     </div>

@@ -17,6 +17,8 @@ const NAV: NavItem[] = [
   { to: "/client/profile", label: "Профиль", icon: User },
 ];
 
+const BOTTOM_NAV = NAV.filter((n) => !n.exact);
+
 function ClientLayout() {
   const { isAuthenticated, userType, signOut } = useAuth();
   const navigate = useNavigate();
@@ -47,6 +49,8 @@ function ClientLayout() {
                 <Link
                   key={n.to}
                   to={n.to}
+                  aria-label={n.label}
+                  aria-current={isActive ? "page" : undefined}
                   className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
                     isActive
                       ? "bg-primary/10 text-primary"
@@ -72,19 +76,21 @@ function ClientLayout() {
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-4 py-6 page-enter"><Outlet /></main>
-      <nav className="fixed bottom-0 left-0 right-0 z-30 grid grid-cols-4 border-t bg-card/90 backdrop-blur-md md:hidden">
-        {NAV.map((n) => {
+      <nav className="fixed bottom-0 left-0 right-0 z-30 flex flex-row flex-nowrap border-t bg-card/90 backdrop-blur-md md:hidden">
+        {BOTTOM_NAV.map((n) => {
           const isActive = active(n.to, n.exact);
           return (
             <Link
               key={n.to}
               to={n.to}
-              className={`relative flex flex-col items-center gap-1 py-2.5 text-xs font-medium transition-colors ${
+              aria-label={n.label}
+              aria-current={isActive ? "page" : undefined}
+              className={`relative flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors ${
                 isActive ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              {isActive && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-primary" />}
-              <n.icon className={`h-5 w-5 ${isActive ? "text-primary" : ""}`} />
+              {isActive && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-5 rounded-full bg-primary" />}
+              <n.icon className={`h-4 w-4 ${isActive ? "text-primary" : ""}`} />
               {n.label}
             </Link>
           );

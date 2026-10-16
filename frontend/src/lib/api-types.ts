@@ -104,6 +104,7 @@ export interface TariffCreateRequest {
   tariff_type: string;
   rate_active: number;
   rate_pause: number;
+  rate_km: number;
   min_charge?: number;
   zone_id?: number | null;
 }
@@ -114,6 +115,7 @@ export interface TariffOut {
   tariff_type: string;
   rate_active: number;
   rate_pause: number;
+  rate_km: number;
   min_charge: number;
   zone_id?: number | null;
   status: string;

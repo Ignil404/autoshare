@@ -10,6 +10,7 @@ class RentalOut(BaseModel):
     car_id: int
     tariff_id: int
     started_at: datetime
+    paused_at: Optional[datetime] = None
     finished_at: Optional[datetime] = None
     active_minutes: int
     pause_minutes: int

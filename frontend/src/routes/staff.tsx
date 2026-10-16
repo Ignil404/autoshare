@@ -4,37 +4,39 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/hooks/use-theme";
+import { useI18n } from "@/lib/i18n";
 import { useState } from "react";
 
 export const Route = createFileRoute("/staff")({ component: StaffLayout });
 
-type Nav = { to: string; label: string; icon: typeof Car; exact?: boolean };
+type Nav = { to: string; labelKey: string; icon: typeof Car; exact?: boolean };
 const NAV: Nav[] = [
-  { to: "/staff", label: "Обзор", icon: LineChart, exact: true },
-  { to: "/staff/clients", label: "Клиенты", icon: Users },
-  { to: "/staff/staff", label: "Сотрудники", icon: BadgeCheck },
-  { to: "/staff/cars", label: "Автопарк", icon: Car },
-  { to: "/staff/tariffs", label: "Тарифы и зоны", icon: Tag },
-  { to: "/staff/discounts", label: "Скидки", icon: Percent },
-  { to: "/staff/bookings", label: "Бронирования", icon: Calendar },
-  { to: "/staff/rentals", label: "Аренды", icon: KeyRound },
-  { to: "/staff/payments", label: "Платежи", icon: ClipboardList },
-  { to: "/staff/maintenance", label: "ТО", icon: Wrench },
-  { to: "/staff/reports", label: "Отчёты", icon: LineChart },
-  { to: "/staff/audit", label: "Аудит", icon: ScrollText },
-  { to: "/staff/logs", label: "Логи", icon: FileText },
+  { to: "/staff", labelKey: "staff.nav.overview", icon: LineChart, exact: true },
+  { to: "/staff/clients", labelKey: "staff.nav.clients", icon: Users },
+  { to: "/staff/staff", labelKey: "staff.nav.staff", icon: BadgeCheck },
+  { to: "/staff/cars", labelKey: "staff.nav.cars", icon: Car },
+  { to: "/staff/tariffs", labelKey: "staff.nav.tariffs", icon: Tag },
+  { to: "/staff/discounts", labelKey: "staff.nav.discounts", icon: Percent },
+  { to: "/staff/bookings", labelKey: "staff.nav.bookings", icon: Calendar },
+  { to: "/staff/rentals", labelKey: "staff.nav.rentals", icon: KeyRound },
+  { to: "/staff/payments", labelKey: "staff.nav.payments", icon: ClipboardList },
+  { to: "/staff/maintenance", labelKey: "staff.nav.maintenance", icon: Wrench },
+  { to: "/staff/reports", labelKey: "staff.nav.reports", icon: LineChart },
+  { to: "/staff/audit", labelKey: "staff.nav.audit", icon: ScrollText },
+  { to: "/staff/logs", labelKey: "staff.nav.logs", icon: FileText },
 ];
 
 function StaffLayout() {
   const { isAuthenticated, userType, signOut, claims } = useAuth();
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   if (!isAuthenticated) return <Navigate to="/auth/staff/login" />;
   if (userType !== "staff") return <Navigate to="/client" />;
 
   const role = typeof claims?.role === "string" ? claims.role : (typeof claims?.user_type === "string" ? claims.user_type : "staff");
-  const roleLabels: Record<string, string> = { ADMIN: "Администратор", OPERATOR: "Оператор", MAINTENANCE: "Мастер" };
+  const roleLabel = t(`staff.role.${role}`);
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -45,17 +47,17 @@ function StaffLayout() {
           </div>
           <div>
             <div className="tracking-tight">AutoShare</div>
-            <div className="text-[10px] font-medium opacity-50 tracking-widest uppercase">Панель управления</div>
+            <div className="text-[10px] font-medium opacity-50 tracking-widest uppercase">{t("staff.dashboard")}</div>
           </div>
         </div>
         <SideNav />
         <div className="p-3 border-t border-sidebar-border">
           <div className="flex items-center gap-2 rounded-lg bg-sidebar-accent/50 px-3 py-2 text-xs">
             <div className="grid h-7 w-7 place-items-center rounded-full bg-sidebar-primary/20 text-sidebar-primary font-semibold text-[10px]">
-              {roleLabels[role]?.[0] ?? "S"}
+              {roleLabel?.[0] ?? "S"}
             </div>
             <div>
-              <div className="font-medium">{roleLabels[role] ?? role}</div>
+              <div className="font-medium">{roleLabel ?? role}</div>
             </div>
           </div>
         </div>
@@ -74,7 +76,7 @@ function StaffLayout() {
                 <SideNav onNavigate={() => setOpen(false)} />
               </SheetContent>
             </Sheet>
-            <span className="font-semibold text-sm">Панель управления</span>
+            <span className="font-semibold text-sm">{t("staff.dashboard")}</span>
             <Button variant="ghost" size="sm" onClick={() => { signOut(); navigate({ to: "/" }); }}><LogOut className="h-4 w-4" /></Button>
           </div>
         </header>
@@ -85,7 +87,7 @@ function StaffLayout() {
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
             <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => { signOut(); navigate({ to: "/" }); }}>
-              <LogOut className="h-4 w-4 mr-2" />Выйти
+              <LogOut className="h-4 w-4 mr-2" />{t("staff.logout")}
             </Button>
           </div>
         </header>
@@ -97,6 +99,7 @@ function StaffLayout() {
 
 function SideNav({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
+  const { t } = useI18n();
   const active = (to: string, exact?: boolean) => exact ? location.pathname === to : location.pathname.startsWith(to);
   return (
     <nav className="flex-1 overflow-auto p-2 space-y-0.5">
@@ -106,6 +109,8 @@ function SideNav({ onNavigate }: { onNavigate?: () => void }) {
           <Link
             key={n.to}
             to={n.to}
+            aria-label={t(n.labelKey)}
+            aria-current={isActive ? "page" : undefined}
             onClick={onNavigate}
             className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
               isActive
@@ -113,7 +118,7 @@ function SideNav({ onNavigate }: { onNavigate?: () => void }) {
                 : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
             }`}
           >
-            <n.icon className="h-4 w-4" /> {n.label}
+            <n.icon className="h-4 w-4" /> {t(n.labelKey)}
           </Link>
         );
       })}

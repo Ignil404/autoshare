@@ -36,28 +36,29 @@ function Index() {
       <main>
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/10" />
-          <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+          <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-primary/5 blur-3xl animate-pulse" />
           <div className="absolute -bottom-32 -left-32 h-80 w-80 rounded-full bg-accent/10 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/[0.02] blur-3xl" />
           <div className="relative mx-auto max-w-6xl px-4 py-20 md:py-32">
-            <div className="max-w-2xl">
+            <div className="max-w-2xl slide-up">
               <div className="inline-flex items-center gap-2 rounded-full border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm mb-6">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                 Минск · 3 зоны · 6 автомобилей
               </div>
               <h1 className="text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl leading-[1.1]">
                 Каршеринг{" "}
-                <span className="text-primary">без бюрократии</span>
+                <span className="gradient-text">без бюрократии</span>
               </h1>
               <p className="mt-5 text-lg text-muted-foreground max-w-xl leading-relaxed">
                 Забронируйте машину за 30 секунд, начните поездку с телефона и платите только за фактическое время.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button asChild size="lg" className="shadow-lg shadow-primary/20 px-6">
+                <Button asChild size="lg" className="shadow-lg shadow-primary/20 px-6 hover-lift">
                   <Link to="/auth/register">
                     Начать пользоваться <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="px-6">
+                <Button asChild size="lg" variant="outline" className="px-6 hover:bg-primary/5 hover:border-primary/30">
                   <Link to="/auth/login">У меня уже есть аккаунт</Link>
                 </Button>
               </div>
@@ -76,13 +77,13 @@ function Index() {
                 { step: "01", icon: Zap, title: "Забронируйте", text: "Выберите свободный автомобиль на карте и подтвердите бронь." },
                 { step: "02", icon: Clock, title: "Начните поездку", text: "Откройте машину из приложения и езжайте куда хотите." },
                 { step: "03", icon: CreditCard, title: "Оплатите", text: "Платите только за фактическое время использования." },
-              ].map((f) => (
-                <div key={f.step} className="group relative rounded-2xl border bg-card p-6 transition-all hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20">
-                  <div className="absolute top-4 right-4 text-5xl font-black text-muted/30">{f.step}</div>
-                  <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+              ].map((f, i) => (
+                <div key={f.step} className={`group relative rounded-2xl border bg-card p-6 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20 hover:-translate-y-1 slide-up stagger-${i + 1}`}>
+                  <div className="absolute top-4 right-4 text-5xl font-black text-muted/30 transition-all duration-300 group-hover:text-primary/10 group-hover:scale-[1.02]">{f.step}</div>
+                  <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-[1.02] group-hover:shadow-md group-hover:shadow-primary/20">
                     <f.icon className="h-5 w-5" />
                   </div>
-                  <h3 className="mt-4 font-semibold text-lg">{f.title}</h3>
+                  <h3 className="mt-4 font-semibold text-lg group-hover:text-primary transition-colors">{f.title}</h3>
                   <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{f.text}</p>
                 </div>
               ))}
@@ -104,9 +105,9 @@ function Index() {
                 { icon: CreditCard, title: "Промокоды", text: "Скидки для новых и постоянных клиентов." },
                 { icon: Clock, title: "Пауза и возобновление", text: "Приостановите аренду в любой момент." },
                 { icon: Car, title: "Разные классы", text: "Эконом, комфорт и бизнес." },
-              ].map((f) => (
-                <div key={f.title} className="flex gap-3 rounded-xl border p-4 transition-colors hover:bg-secondary/30">
-                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+              ].map((f, i) => (
+                <div key={f.title} className={`flex gap-3 rounded-xl border p-4 transition-all duration-300 hover:bg-secondary/30 hover:shadow-sm hover:-translate-y-0.5 slide-up stagger-${i + 1}`}>
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary transition-transform duration-300 hover:scale-[1.02]">
                     <f.icon className="h-4 w-4" />
                   </div>
                   <div>
@@ -121,11 +122,11 @@ function Index() {
 
         <section className="border-t bg-secondary/20">
           <div className="mx-auto max-w-6xl px-4 py-16 grid gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border bg-card p-8 transition-all hover:shadow-lg hover:shadow-primary/5">
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
+            <div className="group rounded-2xl border bg-card p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20 hover:-translate-y-0.5 slide-up stagger-1">
+              <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-[1.02] group-hover:shadow-md group-hover:shadow-primary/20">
                 <Users className="h-6 w-6" />
               </div>
-              <h3 className="mt-4 text-xl font-semibold">Для клиентов</h3>
+              <h3 className="mt-4 text-xl font-semibold group-hover:text-primary transition-colors">Для клиентов</h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 Регистрация, бронирование, старт/пауза/завершение аренды, история поездок и оплаты.
               </p>
@@ -133,11 +134,11 @@ function Index() {
                 <Link to="/auth/login">Войти как клиент</Link>
               </Button>
             </div>
-            <div className="rounded-2xl border bg-card p-8 transition-all hover:shadow-lg hover:shadow-primary/5">
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
+            <div className="group rounded-2xl border bg-card p-8 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20 hover:-translate-y-0.5 slide-up stagger-2">
+              <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-[1.02] group-hover:shadow-md group-hover:shadow-primary/20">
                 <ShieldCheck className="h-6 w-6" />
               </div>
-              <h3 className="mt-4 text-xl font-semibold">Для сотрудников</h3>
+              <h3 className="mt-4 text-xl font-semibold group-hover:text-primary transition-colors">Для сотрудников</h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 Управление клиентами, автопарком, тарифами, скидками, ТО, платежами, отчётами и аудитом.
               </p>

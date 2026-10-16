@@ -9,6 +9,7 @@ class TariffOut(BaseModel):
     tariff_type: str
     rate_active: float
     rate_pause: float
+    rate_km: float
     min_charge: float
     zone_id: Optional[int] = None
     status: str

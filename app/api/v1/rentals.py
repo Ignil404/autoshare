@@ -79,6 +79,7 @@ def pause_rental(rental_id: int, payload: dict = Depends(require_auth), db: Sess
     now = _utcnow()
     elapsed = int((now - rental.started_at).total_seconds() / 60)
     rental.active_minutes += elapsed
+    rental.paused_at = now
     rental.status = "PAUSED"
     db.flush()
 
@@ -92,7 +93,12 @@ def resume_rental(rental_id: int, payload: dict = Depends(require_auth), db: Ses
     if rental.status != "PAUSED":
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Rental not paused")
 
+    if rental.paused_at:
+        pause_elapsed = int((_utcnow() - rental.paused_at).total_seconds() / 60)
+        rental.pause_minutes += pause_elapsed
+
     rental.started_at = _utcnow()
+    rental.paused_at = None
     rental.status = "ACTIVE"
     db.flush()
 
@@ -109,7 +115,7 @@ def complete_rental(rental_id: int, body: RentalActionRequest = RentalActionRequ
     now = _utcnow()
     rental.finished_at = now
     if rental.status == "ACTIVE":
-        elapsed = int((now - rental.started_at).total_seconds() / 60)
+        elapsed = max(1, int((now - rental.started_at).total_seconds() / 60))
         rental.active_minutes += elapsed
     if body.distance_km is not None:
         rental.distance_km = body.distance_km
@@ -118,19 +124,34 @@ def complete_rental(rental_id: int, body: RentalActionRequest = RentalActionRequ
     if tariff:
         active_cost = float(tariff.rate_active) * rental.active_minutes
         pause_cost = float(tariff.rate_pause) * rental.pause_minutes
-        rental.total_cost = max(float(tariff.min_charge), active_cost + pause_cost)
+        km_cost = float(tariff.rate_km) * (rental.distance_km or 0)
+        rental.total_cost = max(float(tariff.min_charge), active_cost + pause_cost + km_cost)
 
     rental.status = "COMPLETED"
 
-    if rental.total_cost:
+    if rental.total_cost and rental.total_cost > 0:
         from app.models.clients import Client
+        from app.models.payments import Payment
+        from decimal import Decimal
+
         client = db.query(Client).filter(Client.client_id == rental.client_id).first()
         if client:
-            client.balance = float(client.balance) - float(rental.total_cost)
+            client.balance = float(Decimal(str(client.balance)) - Decimal(str(rental.total_cost)))
+
+        payment = Payment(
+            rental_id=rental.rental_id,
+            client_id=rental.client_id,
+            amount=rental.total_cost,
+            payment_type="RENTAL",
+            status="COMPLETED",
+        )
+        db.add(payment)
 
     car = db.query(Car).filter(Car.car_id == rental.car_id).first()
     if car:
         car.status = "FREE"
+        if rental.distance_km:
+            car.mileage += int(rental.distance_km)
     db.flush()
 
     log_action(

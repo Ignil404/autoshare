@@ -1,6 +1,6 @@
 import type { StoredAuth, TokenResponse, UserType } from "./api-types";
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:8000";
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) || "";
 const STORAGE_KEY = "autoshare.auth";
 
 export function getAuth(): StoredAuth | null {
@@ -35,14 +35,15 @@ export class ApiError extends Error {
 }
 
 function buildUrl(path: string, query?: Record<string, unknown>) {
-  const url = new URL(path.startsWith("http") ? path : `${BASE_URL}${path}`);
+  const full = path.startsWith("http") ? path : `${BASE_URL}${path}`;
+  const url = new URL(full, typeof window !== "undefined" ? window.location.origin : "http://localhost");
   if (query) {
     for (const [k, v] of Object.entries(query)) {
       if (v === undefined || v === null || v === "") continue;
       url.searchParams.set(k, String(v));
     }
   }
-  return url.toString();
+  return url.pathname + url.search;
 }
 
 async function parseError(res: Response): Promise<ApiError> {

@@ -13,6 +13,7 @@ class Tariff(Base):
     tariff_type: Mapped[str] = mapped_column(String(20))
     rate_active: Mapped[float] = mapped_column(Numeric(8, 2))
     rate_pause: Mapped[float] = mapped_column(Numeric(8, 2))
+    rate_km: Mapped[float] = mapped_column(Numeric(8, 2), server_default=sa_text("0"))
     min_charge: Mapped[float] = mapped_column(Numeric(8, 2), server_default=sa_text("0"))
     zone_id: Mapped[Optional[int]] = mapped_column(ForeignKey("zones.zone_id"))
     status: Mapped[str] = mapped_column(String(20), server_default=sa_text("'ACTIVE'"))

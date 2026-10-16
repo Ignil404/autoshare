@@ -27,20 +27,20 @@ function StaffDashboard() {
   ] as const;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 page-enter">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Обзор</h1>
         <p className="text-sm text-muted-foreground mt-1">Состояние автопарка и ключевые показатели.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((k) => (
+        {kpis.map((k, i) => (
           <Link key={k.label} to={k.to}>
-            <div className="group rounded-2xl border bg-card p-5 transition-all hover:shadow-lg hover:shadow-black/5 hover:border-primary/20">
+            <div className="group rounded-2xl border bg-card p-5 transition-all duration-300 hover:shadow-lg hover:shadow-black/5 hover:border-primary/20 hover:-translate-y-0.5" style={{ animationDelay: `${i * 50}ms` }}>
               <div className="flex items-center justify-between mb-3">
-                <div className={`grid h-10 w-10 place-items-center rounded-xl ${k.color} transition-transform group-hover:scale-105`}>
+                <div className={`grid h-10 w-10 place-items-center rounded-xl ${k.color} transition-transform duration-300 group-hover:scale-[1.02]`}>
                   <k.icon className="h-5 w-5" />
                 </div>
-                <TrendingUp className="h-4 w-4 text-muted-foreground/30" />
+                <TrendingUp className="h-4 w-4 text-muted-foreground/30 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-primary/50" />
               </div>
               <div className="text-3xl font-bold tracking-tight">{k.value}</div>
               <div className="text-sm font-medium mt-1">{k.label}</div>

@@ -16,6 +16,7 @@ class Rental(Base):
     car_id: Mapped[int] = mapped_column(ForeignKey("cars.car_id"))
     tariff_id: Mapped[int] = mapped_column(ForeignKey("tariffs.tariff_id"))
     started_at: Mapped[datetime] = mapped_column(DateTime)
+    paused_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
     finished_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
     active_minutes: Mapped[int] = mapped_column(Integer, server_default=sa_text("0"))
     pause_minutes: Mapped[int] = mapped_column(Integer, server_default=sa_text("0"))

@@ -5,14 +5,15 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 import type { BookingOut, CarOut } from "@/lib/api-types";
 import { apiErrorMessage } from "@/lib/format";
+import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Car as CarIcon, Palette, Hash, Gauge, Search, Calendar, MapPin, Fuel, Wrench, Clock, Tag, ArrowRight, Map, Camera } from "lucide-react";
+import { AnimatedModal, ModalClose } from "@/components/animated-modal";
 
 export const Route = createFileRoute("/client/cars")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/client/cars")({
 
 function BrowseCars() {
   const { car_id } = Route.useSearch();
+  const { t } = useI18n();
   const [carClass, setCarClass] = useState<string>("");
   const [search, setSearch] = useState("");
   const qc = useQueryClient();
@@ -34,6 +36,7 @@ function BrowseCars() {
   const [viewCar, setViewCar] = useState<CarOut | null>(null);
   const [showBooking, setShowBooking] = useState(false);
   const [promo, setPromo] = useState("");
+  const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,7 +50,7 @@ function BrowseCars() {
     mutationFn: (payload: { car_id: number; discount_code?: string }) =>
       api.post<BookingOut>("/api/v1/bookings/", payload),
     onSuccess: () => {
-      toast.success("Автомобиль забронирован! Бронь действует 20 минут.");
+      toast.success(t("cars.booking_success"));
       qc.invalidateQueries({ queryKey: ["client-free-cars"] });
       qc.invalidateQueries({ queryKey: ["client-bookings"] });
       setShowBooking(false); setViewCar(null); setPromo("");
@@ -65,7 +68,7 @@ function BrowseCars() {
     BUSINESS: "bg-amber-50 text-amber-700 border-amber-200",
   };
   const classLabels: Record<string, string> = {
-    ECONOMY: "Эконом", COMFORT: "Комфорт", BUSINESS: "Бизнес",
+    ECONOMY: t("cars.economy"), COMFORT: t("cars.comfort"), BUSINESS: t("cars.business"),
   };
   const classEmoji: Record<string, string> = {
     ECONOMY: "🟢", COMFORT: "🔵", BUSINESS: "🟡",
@@ -75,25 +78,25 @@ function BrowseCars() {
     <div className="space-y-5 page-enter">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Свободные автомобили</h1>
-          <p className="text-sm text-muted-foreground mt-1">Нажмите на машину, чтобы посмотреть подробности и забронировать.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t("cars.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("cars.subtitle")}</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => navigate({ to: "/client/zones" })}>
-          <Map className="h-4 w-4 mr-1.5" /> На карте
+          <Map className="h-4 w-4 mr-1.5" /> {t("cars.to_map")}
         </Button>
       </div>
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative sm:flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input className="pl-10" placeholder="Поиск по марке, модели, номеру…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input className="pl-10" placeholder={t("cars.search")} value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Select value={carClass || "all"} onValueChange={(v) => setCarClass(v === "all" ? "" : v)}>
           <SelectTrigger className="sm:w-44"><SelectValue placeholder="Класс" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Все классы</SelectItem>
-            <SelectItem value="economy">Эконом</SelectItem>
-            <SelectItem value="comfort">Комфорт</SelectItem>
-            <SelectItem value="business">Бизнес</SelectItem>
+            <SelectItem value="all">{t("cars.all_classes")}</SelectItem>
+            <SelectItem value="economy">{t("cars.economy")}</SelectItem>
+            <SelectItem value="comfort">{t("cars.comfort")}</SelectItem>
+            <SelectItem value="business">{t("cars.business")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -119,16 +122,16 @@ function BrowseCars() {
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border bg-card p-12 text-center">
           <div className="text-4xl mb-3">🚗</div>
-          <p className="text-muted-foreground font-medium">Свободных машин нет</p>
-          <p className="text-sm text-muted-foreground/70 mt-1">Попробуйте изменить фильтр или проверьте позже</p>
+          <p className="text-muted-foreground font-medium">{t("cars.no_cars")}</p>
+          <p className="text-sm text-muted-foreground/70 mt-1">{t("cars.no_cars_sub")}</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((c) => (
-            <div key={c.car_id} className="group relative rounded-2xl border bg-card p-5 transition-all duration-200 hover:shadow-xl hover:shadow-primary/8 hover:border-primary/25 hover:-translate-y-0.5 cursor-pointer" onClick={() => setViewCar(c)}>
+            <div key={c.car_id} className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20 cursor-pointer" onClick={(e) => { setOriginRect(e.currentTarget.getBoundingClientRect()); setViewCar(c); }}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200 group-hover:scale-110">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 group-hover:scale-[1.02]">
                     <CarIcon className="h-5 w-5" />
                   </div>
                   <div>
@@ -146,16 +149,16 @@ function BrowseCars() {
                 <div className="flex items-center gap-2"><Gauge className="h-3.5 w-3.5" /><span>{c.mileage?.toLocaleString()} км</span></div>
               </div>
               <div className="mt-4 pt-3 border-t flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Подробнее</span>
-                <ArrowRight className="h-4 w-4 text-primary opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-1" />
+                <span className="text-xs text-muted-foreground">{t("cars.details")}</span>
+                <ArrowRight className="h-4 w-4 text-primary opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1" />
               </div>
             </div>
           ))}
         </div>
       )}
 
-      <Dialog open={!!viewCar && !showBooking} onOpenChange={(o) => { if (!o) { setViewCar(null); setPromo(""); } }}>
-        <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
+      <AnimatedModal open={!!viewCar && !showBooking} onClose={() => { setViewCar(null); setPromo(""); }} originRect={originRect} className="rounded-2xl border bg-background shadow-2xl overflow-hidden">
+          <ModalClose onClick={() => { setViewCar(null); setPromo(""); }} />
           {viewCar && (
             <>
                 <div className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 p-6 pb-4">
@@ -210,19 +213,18 @@ function BrowseCars() {
                 </div>
               </div>
               <div className="px-6 pb-6 flex gap-2">
-                <Button variant="ghost" className="flex-1" onClick={() => { setViewCar(null); setPromo(""); }}>Закрыть</Button>
+                <Button variant="ghost" className="flex-1" onClick={() => { setViewCar(null); setPromo(""); }}>{t("common.cancel")}</Button>
                 <Button className="flex-1 shadow-md shadow-primary/15 hover-lift" onClick={() => setShowBooking(true)}>
-                  Забронировать <ArrowRight className="h-4 w-4 ml-1.5" />
+                  {t("cars.book")} <ArrowRight className="h-4 w-4 ml-1.5" />
                 </Button>
               </div>
             </>
           )}
-        </DialogContent>
-      </Dialog>
+      </AnimatedModal>
 
-      <Dialog open={showBooking} onOpenChange={(o) => { if (!o) { setShowBooking(false); setPromo(""); } }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader><DialogTitle className="text-xl">Подтвердите бронь</DialogTitle></DialogHeader>
+      <AnimatedModal open={showBooking} onClose={() => { setShowBooking(false); setPromo(""); }} originRect={null} className="rounded-2xl border bg-background shadow-2xl p-6 max-w-md">
+          <ModalClose onClick={() => { setShowBooking(false); setPromo(""); }} />
+          <h2 className="text-xl font-bold">{t("cars.confirm_booking")}</h2>
           {viewCar && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 rounded-xl bg-secondary/50 p-3">
@@ -236,19 +238,18 @@ function BrowseCars() {
                 Бронь будет действовать <span className="font-semibold text-foreground">20 минут</span>. Если за это время вы не начнёте аренду, бронь автоматически отменится.
               </div>
               <div className="space-y-2">
-                <Label className="text-sm">Промокод</Label>
-                <Input value={promo} onChange={(e) => setPromo(e.target.value)} placeholder="Введите код (необязательно)" />
+                <Label className="text-sm">{t("cars.promo")}</Label>
+                <Input value={promo} onChange={(e) => setPromo(e.target.value)} placeholder={t("cars.promo_placeholder")} />
               </div>
             </div>
           )}
-          <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => { setShowBooking(false); setPromo(""); }}>Назад</Button>
+          <div className="flex gap-2 mt-4">
+            <Button variant="ghost" className="flex-1" onClick={() => { setShowBooking(false); setPromo(""); }}>{t("cars.back")}</Button>
             <Button disabled={bookM.isPending} onClick={() => viewCar && bookM.mutate({ car_id: viewCar.car_id, discount_code: promo || undefined })}>
-              {bookM.isPending ? "Бронируем…" : "Подтвердить"}
+              {bookM.isPending ? "…" : t("cars.confirm")}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+      </AnimatedModal>
     </div>
   );
 }

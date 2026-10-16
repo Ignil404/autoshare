@@ -15,7 +15,7 @@ from app.services.audit_service import log_action
 router = APIRouter()
 
 
-@router.get("/me", response_model=ClientOut)
+@router.api_route("/me", response_model=ClientOut, methods=["GET", "HEAD"])
 def get_me(payload: dict = Depends(require_auth), db: Session = Depends(get_db)):
     if payload["actor_type"] != "CLIENT":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Client only")
@@ -26,7 +26,7 @@ def get_me(payload: dict = Depends(require_auth), db: Session = Depends(get_db))
     return client
 
 
-@router.get("/me/stats")
+@router.api_route("/me/stats", methods=["GET", "HEAD"])
 def get_me_stats(payload: dict = Depends(require_auth), db: Session = Depends(get_db)):
     if payload["actor_type"] != "CLIENT":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Client only")
@@ -97,7 +97,7 @@ def topup_me(body: ClientTopUpRequest, payload: dict = Depends(require_auth), db
     return client
 
 
-@router.get("/me/payments", response_model=list[PaymentOut])
+@router.api_route("/me/payments", response_model=list[PaymentOut], methods=["GET", "HEAD"])
 def get_me_payments(payload: dict = Depends(require_auth), db: Session = Depends(get_db)):
     if payload["actor_type"] != "CLIENT":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Client only")
@@ -178,6 +178,14 @@ def topup_client(client_id: int, body: TopUpRequest, payload: dict = Depends(req
 
     from decimal import Decimal
     client.balance = float(Decimal(str(client.balance)) + Decimal(str(body.amount)))
+
+    payment = Payment(
+        client_id=client.client_id,
+        amount=body.amount,
+        payment_type="TOPUP",
+        status="COMPLETED",
+    )
+    db.add(payment)
     db.flush()
 
     log_action(

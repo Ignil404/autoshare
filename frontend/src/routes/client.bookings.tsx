@@ -79,7 +79,7 @@ function MyBookings() {
       ) : (
         <div className="space-y-3">
           {sorted.map((b) => (
-            <div key={b.booking_id} className="rounded-2xl border bg-card p-5 transition-all duration-200 hover:shadow-md">
+            <div key={b.booking_id} className="rounded-2xl border bg-card p-5 transition-all duration-300 hover:shadow-md">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
