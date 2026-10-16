@@ -20,7 +20,7 @@ except ImportError:
 "
 
 echo "Running migrations..."
-alembic upgrade head
+python3 -m alembic upgrade head
 
 echo "Seeding database..."
 python3 -m app.seed
