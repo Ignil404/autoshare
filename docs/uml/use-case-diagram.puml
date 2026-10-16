@@ -1,0 +1,123 @@
+@startuml use-case-diagram
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F7FBFF
+  BorderColor #2C5F8D
+  ArrowColor #2C5F8D
+}
+
+title Диаграмма вариантов использования системы AutoShare
+
+actor "Клиент" as Client
+actor "Оператор\n(OPERATOR)" as Operator
+actor "Администратор\n(ADMIN)" as Admin
+actor "Мастер\n(MAINTENANCE)" as Master
+rectangle "Система AutoShare" as System {
+
+  ' --- Аутентификация ---
+  usecase "Зарегистрироваться" as UC1
+  usecase "Войти в систему" as UC2
+  usecase "Восстановить токен (refresh)" as UC3
+  usecase "Сменить пароль" as UC4
+  usecase "Подтвердить e-mail" as UC5
+
+  ' --- Клиентские сценарии ---
+  usecase "Просмотреть автомобили на карте" as UC10
+  usecase "Забронировать автомобиль\n(TTL 20 мин)" as UC11
+  usecase "Применить промокод" as UC12
+  usecase "Отменить бронирование" as UC13
+  usecase "Начать аренду" as UC14
+  usecase "Поставить аренду на паузу" as UC15
+  usecase "Возобновить аренду" as UC16
+  usecase "Завершить аренду\n(расчёт стоимости)" as UC17
+  usecase "Просмотреть профиль и баланс" as UC18
+  usecase "Просмотреть историю аренд и платежей" as UC19
+  usecase "Просмотреть зоны обслуживания" as UC20
+
+  ' --- Персонал ---
+  usecase "Управлять автопарком\n(добавить / сменить статус)" as UC30
+  usecase "Управлять клиентами\n(верифицировать / блокировать)" as UC31
+  usecase "Управлять бронированиями\n(отмена)" as UC32
+  usecase "Наблюдать за арендами" as UC33
+  usecase "Регистрировать платежи" as UC34
+  usecase "Управлять тарифами" as UC35
+  usecase "Управлять зонами" as UC36
+  usecase "Управлять скидками" as UC37
+  usecase "Формировать отчёты" as UC38
+  usecase "Управлять персоналом" as UC40
+  usecase "Просматривать аудит-лог" as UC41
+  usecase "Просматривать системные логи" as UC42
+  usecase "Создавать заявки на ТО" as UC50
+  usecase "Назначать исполнителя" as UC51
+  usecase "Закрывать заявку на ТО" as UC52
+  usecase "Просматривать историю обслуживания" as UC53
+
+  ' --- Система ---
+  usecase "Истекать бронированиям\n(фоновый процесс)" as UC60
+  usecase "Рассчитывать стоимость аренды" as UC61
+  usecase "Списывать средства с баланса" as UC62
+  usecase "Фиксировать действие в аудите" as UC63
+  usecase "Рассылать события по WebSocket" as UC64
+  usecase "Ограничивать частоту запросов" as UC65
+}
+
+' ============ Клиент ============
+Client --> UC1
+Client --> UC2
+Client --> UC3
+Client --> UC4
+Client --> UC10
+Client --> UC11
+Client --> UC13
+Client --> UC14
+Client --> UC15
+Client --> UC16
+Client --> UC17
+Client --> UC18
+Client --> UC19
+Client --> UC20
+
+UC11 ..> UC12 : <<include>>
+UC11 ..> UC10 : <<include>>
+UC14 ..> UC11 : <<extend>> (только по активной брони)
+UC17 ..> UC61 : <<include>>
+UC61 ..> UC62 : <<include>>
+UC61 ..> UC63 : <<include>>
+UC1 ..> UC5 : <<extend>>
+
+' ============ Оператор ============
+Operator --> UC2
+Operator --> UC30
+Operator --> UC31
+Operator --> UC32
+Operator --> UC33
+Operator --> UC34
+Operator --> UC35
+Operator --> UC36
+Operator --> UC37
+Operator --> UC38
+
+' ============ Администратор ============
+Admin --> UC2
+Admin --> UC40
+Admin --> UC41
+Admin --> UC42
+Admin --> UC38
+Admin --> UC30
+
+' ============ Мастер ============
+Master --> UC2
+Master --> UC50
+Master --> UC51
+Master --> UC52
+Master --> UC53
+
+' ============ Система ============
+UC60 ..> UC63 : <<include>>
+UC2 ..> UC65 : <<include>>
+UC33 ..> UC64 : <<extend>>
+UC32 ..> UC64 : <<extend>>
+
+@enduml

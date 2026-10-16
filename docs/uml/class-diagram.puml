@@ -1,0 +1,225 @@
+@startuml class-diagram
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #2C5F8D
+  ArrowColor #2C5F8D
+  FontSize 12
+}
+skinparam packageStyle rectangle
+title Диаграмма классов предметной области AutoShare (по модели SQLAlchemy)
+
+package "Идентификация и доступ" {
+  class Client {
+    +client_id : int {PK}
+    -last_name : str
+    -first_name : str
+    -middle_name : str?
+    -birth_date : date
+    -phone : str {UQ}
+    -email : str {UQ}
+    -password_hash : str
+    -two_factor_secret : str?
+    -is_email_verified : bool
+    -license_number : str {UQ}
+    -license_issued : date
+    -status : Enum(PENDING|ACTIVE|BLOCKED)
+    -balance : Decimal(10,2)
+    -created_at : datetime
+    +register() : void
+    +verify() : void
+    +block() : void
+    +topUp(amount) : void
+    +changePassword(old, new) : void
+  }
+
+  class Staff {
+    +staff_id : int {PK}
+    -full_name : str
+    -email : str {UQ}
+    -phone : str?
+    -password_hash : str
+    -role : Enum(OPERATOR|ADMIN|MAINTENANCE)
+    -status : Enum(ACTIVE|BLOCKED)
+    -created_at : datetime
+    +login() : Token
+    +block() : void
+  }
+}
+
+package "Автопарк" {
+  class Car {
+    +car_id : int {PK}
+    -plate_number : str {UQ}
+    -brand : str
+    -model : str
+    -year : smallint
+    -color : str?
+    -car_class : Enum(ECONOMY|COMFORT|BUSINESS)
+    -status : Enum(FREE|BOOKED|RENTED|MAINTENANCE|UNAVAILABLE)
+    -mileage : int
+    -last_service : date?
+    -lat : float?
+    -lng : float?
+    +isAvailable() : bool
+    +setStatus(s) : void
+    +addMileage(km) : void
+  }
+
+  class Zone {
+    +zone_id : int {PK}
+    -name : str
+    -zone_type : Enum(AVAILABLE|RESTRICTED)
+    -boundary : text (GeoJSON)
+    -status : Enum(ACTIVE|INACTIVE)
+    +contains(lat, lng) : bool
+  }
+
+  class Tariff {
+    +tariff_id : int {PK}
+    -name : str
+    -tariff_type : Enum(MINUTE|HOUR|DAY)
+    -rate_active : Decimal(8,2)
+    -rate_pause : Decimal(8,2)
+    -rate_km : Decimal(8,2)
+    -min_charge : Decimal(8,2)
+    -status : Enum(ACTIVE|INACTIVE)
+    -valid_from : date
+    +deactivate() : void
+    +calculateCost(activeMin, pauseMin, km) : Decimal
+  }
+}
+
+package "Процесс аренды" {
+  class Booking {
+    +booking_id : int {PK}
+    -created_at : datetime
+    -expires_at : datetime
+    -status : Enum(CREATED|CONVERTED|CANCELLED_CLIENT|
+                   CANCELLED_TIMER|CANCELLED_STAFF)
+    +cancel(reason) : void
+    +isExpired(now) : bool
+    +convertToRental() : Rental
+  }
+
+  class Rental {
+    +rental_id : int {PK}
+    -started_at : datetime
+    -paused_at : datetime?
+    -finished_at : datetime?
+    -active_minutes : int
+    -pause_minutes : int
+    -distance_km : Decimal(8,2)
+    -total_cost : Decimal(10,2)?
+    -status : Enum(ACTIVE|PAUSED|COMPLETED|FORCE_COMPLETED)
+    +start() : void
+    +pause() : void
+    +resume() : void
+    +complete(distance_km) : Decimal
+    +calculateCost(tariff) : Decimal
+  }
+}
+
+package "Финансы и маркетинг" {
+  class Payment {
+    +payment_id : int {PK}
+    -amount : Decimal(10,2)
+    -payment_type : Enum(RENTAL|FINE|REFUND|TOPUP)
+    -status : Enum(PENDING|COMPLETED|FAILED|REFUNDED)
+    -external_id : str?
+    -processed_at : datetime
+    +commit() : void
+    +refund() : void
+  }
+
+  class Discount {
+    +discount_id : int {PK}
+    -code : str {UQ}
+    -type : Enum(PERCENT|FIXED)
+    -value : Decimal(8,2)
+    -valid_from : date
+    -valid_until : date?
+    -usage_limit : int?
+    -used_count : int
+    -is_active : bool
+    +isValidOn(date) : bool
+    +apply(amount) : Decimal
+  }
+
+  class ClientDiscount {
+    +id : int {PK}
+    -applied_at : datetime
+  }
+}
+
+package "Эксплуатация и администрирование" {
+  class Maintenance {
+    +maintenance_id : int {PK}
+    -work_type : Enum(SERVICE|REPAIR|WASH)
+    -description : text?
+    -created_at : datetime
+    -completed_at : datetime?
+    -status : Enum(OPEN|IN_PROGRESS|CLOSED)
+    -mileage_at_open : int?
+    +assign(staff) : void
+    +start() : void
+    +close() : void
+  }
+
+  class AuditLog {
+    +log_id : int {PK}
+    -actor_type : Enum(CLIENT|STAFF|SYSTEM)
+    -actor_id : int?
+    -action : str
+    -entity : str
+    -entity_id : int?
+    -details : JSONB?
+    -created_at : datetime
+  }
+}
+
+' ================= Связи =================
+Client "1" -- "0..*" Booking : creates
+Client "1" -- "0..*" Rental : performs
+Client "1" -- "0..*" Payment : owns
+Client "1" -- "0..*" ClientDiscount : uses
+Discount "1" -- "0..*" ClientDiscount : redeemed by
+Discount "1" -- "0..*" Booking : applied in
+
+Booking "0..1" -- "0..1" Rental : converted to
+Booking "*" -- "1" Car : reserves
+Booking "*" -- "1" Client
+
+Rental "*" -- "1" Car : uses
+Rental "*" -- "1" Tariff : priced by
+Rental "*" -- "1" Booking : originates from
+Rental "1" -- "0..*" Payment : billed by
+
+Car "*" -- "0..1" Tariff : priced by
+Car "*" -- "0..1" Zone : located in
+Car "1" -- "0..*" Maintenance : serviced in
+Zone "1" -- "0..*" Tariff : applies to
+
+Staff "0..1" -- "0..*" Maintenance : assigned
+Staff "1" -- "0..*" Maintenance : registered by
+
+note "Все действия клиентов, персонала\nи системы фиксируются\nв журнале AuditLog (append-only)" as N1
+N1 .. AuditLog
+
+note bottom of Rental
+  Форма расчёта стоимости:
+  total_cost = max( min_charge,
+    rate_active × active_minutes +
+    rate_pause × pause_minutes +
+    rate_km × distance_km )
+end note
+
+note right of Booking
+  Ограничения целостности:
+  • одно CREATED-бронирование
+    на клиента и на автомобиль
+    (частичные уникальные индексы)
+  • TTL = 20 минут
+end note
+
+@enduml
