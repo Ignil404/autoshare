@@ -34,7 +34,7 @@ function StaffPayments() {
   const [f, setF] = useState<PaymentCreateRequest>({ client_id: 0, amount: 0, payment_type: "topup", rental_id: null });
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
-  const [sortKey, setSortKey] = useState<"payment_id" | "amount" | "created_at">("created_at");
+  const [sortKey, setSortKey] = useState<"payment_id" | "amount" | "processed_at">("processed_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   const createM = useMutation({
@@ -53,7 +53,7 @@ function StaffPayments() {
     .filter((p) => filterType === "all" || p.payment_type === filterType)
     .sort((a, b) => {
       const av = a[sortKey], bv = b[sortKey];
-      const cmp = typeof av === "string" ? av.localeCompare(String(bv)) : (av ?? 0) - (bv ?? 0);
+      const cmp = typeof av === "string" ? av.localeCompare(String(bv)) : Number(av ?? 0) - Number(bv ?? 0);
       return sortDir === "asc" ? cmp : -cmp;
     });
 
@@ -92,7 +92,7 @@ function StaffPayments() {
              <TableHead>Клиент</TableHead><TableHead>Аренда</TableHead>
              <SortHead label="Сумма" field="amount" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
              <TableHead>Тип</TableHead><TableHead>Статус</TableHead>
-             <SortHead label="Дата" field="created_at" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+             <SortHead label="Дата" field="processed_at" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
            </TableRow></TableHeader>
            <TableBody>
              {payments.length === 0 ? (
@@ -105,7 +105,7 @@ function StaffPayments() {
                  <TableCell>{fmtMoney(p.amount)}</TableCell>
                  <TableCell><Badge variant="secondary">{TYPE_LABELS[p.payment_type] ?? p.payment_type}</Badge></TableCell>
                  <TableCell><span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[p.status ?? ""] ?? ""}`}>{p.status ?? "—"}</span></TableCell>
-                 <TableCell>{fmtDateTime(p.created_at)}</TableCell>
+                 <TableCell>{fmtDateTime(p.processed_at)}</TableCell>
                </TableRow>
              ))}
            </TableBody>

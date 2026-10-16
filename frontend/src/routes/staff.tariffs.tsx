@@ -32,10 +32,10 @@ function StaffTariffs() {
 function TariffsTab() {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["s-tariffs"], queryFn: () => api.get<TariffOut[]>("/api/v1/tariffs/") });
-  const [f, setF] = useState<TariffCreateRequest>({ name: "", tariff_type: "per_minute", rate_active: 0, rate_pause: 0, min_charge: 0 });
+  const [f, setF] = useState<TariffCreateRequest>({ name: "", tariff_type: "per_minute", rate_active: 0, rate_pause: 0, rate_km: 0, min_charge: 0 });
   const createM = useMutation({
     mutationFn: (p: TariffCreateRequest) => api.post<TariffOut>("/api/v1/tariffs/", p),
-    onSuccess: () => { toast.success("Тариф создан"); qc.invalidateQueries({ queryKey: ["s-tariffs"] }); setF({ name: "", tariff_type: "per_minute", rate_active: 0, rate_pause: 0, min_charge: 0 }); },
+    onSuccess: () => { toast.success("Тариф создан"); qc.invalidateQueries({ queryKey: ["s-tariffs"] }); setF({ name: "", tariff_type: "per_minute", rate_active: 0, rate_pause: 0, rate_km: 0, min_charge: 0 }); },
     onError: (e) => toast.error(apiErrorMessage(e)),
   });
   const deactM = useMutation({

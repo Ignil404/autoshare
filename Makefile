@@ -1,11 +1,11 @@
-.PHONY: dev test lint build deploy clean
+.PHONY: dev dev-stop test test-cov lint build build-prod deploy deploy-local deploy-stop clean db-reset migrate migration
 
 # ── Development ───────────────────────────────────────────
 dev:
-	docker-compose up --build
+	docker compose up --build
 
 dev-stop:
-	docker-compose down
+	docker compose down
 
 # ── Testing ───────────────────────────────────────────────
 test:
@@ -15,27 +15,36 @@ test-cov:
 	python -m pytest tests/ -v --tb=short --cov=app --cov-report=term-missing
 
 # ── Linting ───────────────────────────────────────────────
-lint:
+lint-deps:
+	pip install -r requirements-dev.txt
+
+lint: lint-deps
 	ruff check app/ tests/
 	cd frontend && bun run lint
 
 # ── Build ─────────────────────────────────────────────────
 build:
-	docker-compose build
+	docker compose build
 
 build-prod:
-	docker-compose -f docker-compose.prod.yml build
+	docker compose -f docker-compose.prod.yml build
 
 # ── Deploy ────────────────────────────────────────────────
+# Релизный деплой: готовые образы из GHCR (задают IMAGE_REPO/IMAGE_TAG)
 deploy:
-	docker-compose -f docker-compose.prod.yml up -d --build
+	docker compose -f docker-compose.prod.yml pull
+	docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+# Ручная сборка на месте (без GHCR)
+deploy-local:
+	docker compose -f docker-compose.prod.yml up -d --build
 
 deploy-stop:
-	docker-compose -f docker-compose.prod.yml down
+	docker compose -f docker-compose.prod.yml down
 
 # ── Clean ─────────────────────────────────────────────────
 clean:
-	docker-compose down -v
+	docker compose down -v
 	docker system prune -f
 	rm -rf app/logs/*.jsonl
 	rm -rf app/uploads/cars/*
@@ -44,8 +53,8 @@ clean:
 
 # ── Database ──────────────────────────────────────────────
 db-reset:
-	docker-compose down -v
-	docker-compose up -d db
+	docker compose down -v
+	docker compose up -d db
 	sleep 5
 	python -m alembic upgrade head
 	python -m app.seed

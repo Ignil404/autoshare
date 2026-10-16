@@ -11,7 +11,7 @@ import { MapPin, Car as CarIcon, Layers, ExternalLink } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/client/zones")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { lat?: number; lng?: number } => ({
     lat: search.lat ? Number(search.lat) : undefined,
     lng: search.lng ? Number(search.lng) : undefined,
   }),

@@ -20,13 +20,16 @@ import { Route as StaffReportsRouteImport } from './routes/staff.reports'
 import { Route as StaffRentalsRouteImport } from './routes/staff.rentals'
 import { Route as StaffPaymentsRouteImport } from './routes/staff.payments'
 import { Route as StaffMaintenanceRouteImport } from './routes/staff.maintenance'
+import { Route as StaffLogsRouteImport } from './routes/staff.logs'
 import { Route as StaffDiscountsRouteImport } from './routes/staff.discounts'
 import { Route as StaffClientsRouteImport } from './routes/staff.clients'
 import { Route as StaffCarsRouteImport } from './routes/staff.cars'
 import { Route as StaffBookingsRouteImport } from './routes/staff.bookings'
 import { Route as StaffAuditRouteImport } from './routes/staff.audit'
+import { Route as ClientZonesRouteImport } from './routes/client.zones'
 import { Route as ClientRentalsRouteImport } from './routes/client.rentals'
 import { Route as ClientProfileRouteImport } from './routes/client.profile'
+import { Route as ClientCarsRouteImport } from './routes/client.cars'
 import { Route as ClientBookingsRouteImport } from './routes/client.bookings'
 import { Route as AuthRegisterRouteImport } from './routes/auth.register'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
@@ -87,6 +90,11 @@ const StaffMaintenanceRoute = StaffMaintenanceRouteImport.update({
   path: '/maintenance',
   getParentRoute: () => StaffRoute,
 } as any)
+const StaffLogsRoute = StaffLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => StaffRoute,
+} as any)
 const StaffDiscountsRoute = StaffDiscountsRouteImport.update({
   id: '/discounts',
   path: '/discounts',
@@ -112,6 +120,11 @@ const StaffAuditRoute = StaffAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => StaffRoute,
 } as any)
+const ClientZonesRoute = ClientZonesRouteImport.update({
+  id: '/zones',
+  path: '/zones',
+  getParentRoute: () => ClientRoute,
+} as any)
 const ClientRentalsRoute = ClientRentalsRouteImport.update({
   id: '/rentals',
   path: '/rentals',
@@ -120,6 +133,11 @@ const ClientRentalsRoute = ClientRentalsRouteImport.update({
 const ClientProfileRoute = ClientProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientCarsRoute = ClientCarsRouteImport.update({
+  id: '/cars',
+  path: '/cars',
   getParentRoute: () => ClientRoute,
 } as any)
 const ClientBookingsRoute = ClientBookingsRouteImport.update({
@@ -150,13 +168,16 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/client/bookings': typeof ClientBookingsRoute
+  '/client/cars': typeof ClientCarsRoute
   '/client/profile': typeof ClientProfileRoute
   '/client/rentals': typeof ClientRentalsRoute
+  '/client/zones': typeof ClientZonesRoute
   '/staff/audit': typeof StaffAuditRoute
   '/staff/bookings': typeof StaffBookingsRoute
   '/staff/cars': typeof StaffCarsRoute
   '/staff/clients': typeof StaffClientsRoute
   '/staff/discounts': typeof StaffDiscountsRoute
+  '/staff/logs': typeof StaffLogsRoute
   '/staff/maintenance': typeof StaffMaintenanceRoute
   '/staff/payments': typeof StaffPaymentsRoute
   '/staff/rentals': typeof StaffRentalsRoute
@@ -172,13 +193,16 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/client/bookings': typeof ClientBookingsRoute
+  '/client/cars': typeof ClientCarsRoute
   '/client/profile': typeof ClientProfileRoute
   '/client/rentals': typeof ClientRentalsRoute
+  '/client/zones': typeof ClientZonesRoute
   '/staff/audit': typeof StaffAuditRoute
   '/staff/bookings': typeof StaffBookingsRoute
   '/staff/cars': typeof StaffCarsRoute
   '/staff/clients': typeof StaffClientsRoute
   '/staff/discounts': typeof StaffDiscountsRoute
+  '/staff/logs': typeof StaffLogsRoute
   '/staff/maintenance': typeof StaffMaintenanceRoute
   '/staff/payments': typeof StaffPaymentsRoute
   '/staff/rentals': typeof StaffRentalsRoute
@@ -197,13 +221,16 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/client/bookings': typeof ClientBookingsRoute
+  '/client/cars': typeof ClientCarsRoute
   '/client/profile': typeof ClientProfileRoute
   '/client/rentals': typeof ClientRentalsRoute
+  '/client/zones': typeof ClientZonesRoute
   '/staff/audit': typeof StaffAuditRoute
   '/staff/bookings': typeof StaffBookingsRoute
   '/staff/cars': typeof StaffCarsRoute
   '/staff/clients': typeof StaffClientsRoute
   '/staff/discounts': typeof StaffDiscountsRoute
+  '/staff/logs': typeof StaffLogsRoute
   '/staff/maintenance': typeof StaffMaintenanceRoute
   '/staff/payments': typeof StaffPaymentsRoute
   '/staff/rentals': typeof StaffRentalsRoute
@@ -223,13 +250,16 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/client/bookings'
+    | '/client/cars'
     | '/client/profile'
     | '/client/rentals'
+    | '/client/zones'
     | '/staff/audit'
     | '/staff/bookings'
     | '/staff/cars'
     | '/staff/clients'
     | '/staff/discounts'
+    | '/staff/logs'
     | '/staff/maintenance'
     | '/staff/payments'
     | '/staff/rentals'
@@ -245,13 +275,16 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/client/bookings'
+    | '/client/cars'
     | '/client/profile'
     | '/client/rentals'
+    | '/client/zones'
     | '/staff/audit'
     | '/staff/bookings'
     | '/staff/cars'
     | '/staff/clients'
     | '/staff/discounts'
+    | '/staff/logs'
     | '/staff/maintenance'
     | '/staff/payments'
     | '/staff/rentals'
@@ -269,13 +302,16 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/client/bookings'
+    | '/client/cars'
     | '/client/profile'
     | '/client/rentals'
+    | '/client/zones'
     | '/staff/audit'
     | '/staff/bookings'
     | '/staff/cars'
     | '/staff/clients'
     | '/staff/discounts'
+    | '/staff/logs'
     | '/staff/maintenance'
     | '/staff/payments'
     | '/staff/rentals'
@@ -375,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StaffMaintenanceRouteImport
       parentRoute: typeof StaffRoute
     }
+    '/staff/logs': {
+      id: '/staff/logs'
+      path: '/logs'
+      fullPath: '/staff/logs'
+      preLoaderRoute: typeof StaffLogsRouteImport
+      parentRoute: typeof StaffRoute
+    }
     '/staff/discounts': {
       id: '/staff/discounts'
       path: '/discounts'
@@ -410,6 +453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StaffAuditRouteImport
       parentRoute: typeof StaffRoute
     }
+    '/client/zones': {
+      id: '/client/zones'
+      path: '/zones'
+      fullPath: '/client/zones'
+      preLoaderRoute: typeof ClientZonesRouteImport
+      parentRoute: typeof ClientRoute
+    }
     '/client/rentals': {
       id: '/client/rentals'
       path: '/rentals'
@@ -422,6 +472,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/client/profile'
       preLoaderRoute: typeof ClientProfileRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/cars': {
+      id: '/client/cars'
+      path: '/cars'
+      fullPath: '/client/cars'
+      preLoaderRoute: typeof ClientCarsRouteImport
       parentRoute: typeof ClientRoute
     }
     '/client/bookings': {
@@ -457,15 +514,19 @@ declare module '@tanstack/react-router' {
 
 interface ClientRouteChildren {
   ClientBookingsRoute: typeof ClientBookingsRoute
+  ClientCarsRoute: typeof ClientCarsRoute
   ClientProfileRoute: typeof ClientProfileRoute
   ClientRentalsRoute: typeof ClientRentalsRoute
+  ClientZonesRoute: typeof ClientZonesRoute
   ClientIndexRoute: typeof ClientIndexRoute
 }
 
 const ClientRouteChildren: ClientRouteChildren = {
   ClientBookingsRoute: ClientBookingsRoute,
+  ClientCarsRoute: ClientCarsRoute,
   ClientProfileRoute: ClientProfileRoute,
   ClientRentalsRoute: ClientRentalsRoute,
+  ClientZonesRoute: ClientZonesRoute,
   ClientIndexRoute: ClientIndexRoute,
 }
 
@@ -478,6 +539,7 @@ interface StaffRouteChildren {
   StaffCarsRoute: typeof StaffCarsRoute
   StaffClientsRoute: typeof StaffClientsRoute
   StaffDiscountsRoute: typeof StaffDiscountsRoute
+  StaffLogsRoute: typeof StaffLogsRoute
   StaffMaintenanceRoute: typeof StaffMaintenanceRoute
   StaffPaymentsRoute: typeof StaffPaymentsRoute
   StaffRentalsRoute: typeof StaffRentalsRoute
@@ -493,6 +555,7 @@ const StaffRouteChildren: StaffRouteChildren = {
   StaffCarsRoute: StaffCarsRoute,
   StaffClientsRoute: StaffClientsRoute,
   StaffDiscountsRoute: StaffDiscountsRoute,
+  StaffLogsRoute: StaffLogsRoute,
   StaffMaintenanceRoute: StaffMaintenanceRoute,
   StaffPaymentsRoute: StaffPaymentsRoute,
   StaffRentalsRoute: StaffRentalsRoute,
@@ -515,3 +578,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

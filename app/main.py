@@ -11,6 +11,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from app.api.v1 import router as v1_router
+from app.api.v1.ws import router as ws_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -89,8 +90,6 @@ async def log_requests(request: Request, call_next):
 
 
 app.include_router(v1_router, prefix="/api/v1")
-
-from app.api.v1.ws import router as ws_router
 app.include_router(ws_router, prefix="/api/v1")
 
 

@@ -44,7 +44,7 @@ def create_booking(body: BookingCreateRequest, payload: dict = Depends(require_a
     if body.discount_code:
         discount = db.query(Discount).filter(
             Discount.code == body.discount_code,
-            Discount.is_active == True,
+            Discount.is_active.is_(True),
         ).first()
         if not discount:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Discount code not found")

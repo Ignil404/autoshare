@@ -16,7 +16,7 @@ import { Car as CarIcon, Palette, Hash, Gauge, Search, Calendar, MapPin, Fuel, W
 import { AnimatedModal, ModalClose } from "@/components/animated-modal";
 
 export const Route = createFileRoute("/client/cars")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { car_id?: number } => ({
     car_id: search.car_id ? Number(search.car_id) : undefined,
   }),
   component: BrowseCars,
@@ -199,7 +199,7 @@ function BrowseCars() {
                   {viewCar.lat && viewCar.lng && <InfoRow icon={Map} label="Координаты" value={`${viewCar.lat.toFixed(4)}, ${viewCar.lng.toFixed(4)}`} />}
                 </div>
                 {viewCar.lat && viewCar.lng && (
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => { setViewCar(null); navigate({ to: "/client/zones", search: { lat: viewCar.lat, lng: viewCar.lng } }); }}>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => { setViewCar(null); navigate({ to: "/client/zones", search: { lat: viewCar.lat ?? undefined, lng: viewCar.lng ?? undefined } }); }}>
                     <Map className="h-4 w-4 mr-1.5" /> Показать на карте
                   </Button>
                 )}

@@ -9,7 +9,6 @@ from app.core.database import get_db
 from app.core.dependencies import require_auth
 from app.models.clients import Client
 from app.models.payments import Payment
-from app.models.rentals import Rental
 from app.schemas.payments import PaymentOut
 from app.services.audit_service import log_action
 

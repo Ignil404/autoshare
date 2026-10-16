@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: autoshare
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-autoshare}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       POSTGRES_DB: autoshare
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -17,11 +17,20 @@ services:
       - autoshare
 
   app:
+    # IMAGE_REPO/IMAGE_TAG выставляет CD-деплой (образы из GHCR);
+    # build оставлен для ручной сборки (make build-prod)
+    image: ${IMAGE_REPO:-ghcr.io/ignil404/autoshare}:${IMAGE_TAG:-latest}
     build: .
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://autoshare:${POSTGRES_PASSWORD:-autoshare}@db:5432/autoshare
-      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      DATABASE_URL: postgresql://autoshare:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/autoshare
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
     depends_on:
       db:
         condition: service_healthy
@@ -29,12 +38,14 @@ services:
       - autoshare
 
   frontend:
+    image: ${IMAGE_REPO:-ghcr.io/ignil404/autoshare}-frontend:${IMAGE_TAG:-latest}
     build: ./frontend
     restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-80}:80"
     depends_on:
-      - app
+      app:
+        condition: service_healthy
     networks:
       - autoshare
 

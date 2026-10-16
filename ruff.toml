@@ -1,0 +1,17 @@
+# Конфигурация ruff для локальной разработки и CI (версия закреплена в requirements-dev.txt)
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = [
+    "E4", # pycodestyle: импорты и пробелы
+    "E7", # pycodestyle: сложность операторов
+    "E9", # pycodestyle: ошибки времени выполнения
+    "F",  # pyflakes
+]
+
+[lint.per-file-ignores]
+# SQLAlchemy: forward references в relationship() ("Mapped[List["Car"]]")
+"app/models/**" = ["F821"]
+# Импорты в тестах регистрируют модели в Base.metadata для create_all()
+"tests/**" = ["F401", "F811"]

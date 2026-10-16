@@ -22,6 +22,12 @@ services:
     environment:
       DATABASE_URL: postgresql://autoshare:autoshare@db:5432/autoshare
       PYTHONPATH: /app
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 30s
     depends_on:
       db:
         condition: service_healthy
@@ -31,7 +37,8 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - app
+      app:
+        condition: service_healthy
 
 volumes:
   pgdata:

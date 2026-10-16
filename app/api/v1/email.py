@@ -1,12 +1,11 @@
 import secrets
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.dependencies import require_auth
 from app.models.clients import Client
 from app.services.audit_service import log_action
 from app.services.log_store import write_log

@@ -84,7 +84,7 @@ function StaffCars() {
     .filter((c) => filterStatus === "all" || c.status === filterStatus)
     .sort((a, b) => {
       const av = a[sortKey], bv = b[sortKey];
-      const cmp = typeof av === "string" ? av.localeCompare(String(bv)) : (av ?? 0) - (bv ?? 0);
+      const cmp = typeof av === "string" ? av.localeCompare(String(bv)) : Number(av ?? 0) - Number(bv ?? 0);
       return sortDir === "asc" ? cmp : -cmp;
     });
 

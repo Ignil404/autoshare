@@ -1,7 +1,7 @@
 from typing import Optional
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Integer, String, func, text as sa_text
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, String, func, text as sa_text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base

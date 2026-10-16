@@ -10,7 +10,12 @@ env:
   IMAGE_PREFIX: ${{ github.repository }}
 
 jobs:
+  # Гейт: релиз не собирается, пока CI (тесты, линт, сборка фронтенда) не прошёл
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   build-and-push:
+    needs: ci
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -26,11 +31,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
+      - name: Extract backend metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      # Отдельный шаг: образ фронтенда живёт в своём реестре
+      # (<prefix>-frontend), иначе его теги перезаписывают образ бэкенда
+      - name: Extract frontend metadata
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-frontend
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -50,27 +67,40 @@ jobs:
         with:
           context: ./frontend
           push: true
-          tags: ${{ steps.meta.outputs.tags }}-frontend
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
           file: ./frontend/Dockerfile
 
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    env:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }} # PAT с read:packages — нужен, если пакеты приватные
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
+          envs: GHCR_TOKEN
           script: |
+            set -e
             cd ${{ secrets.DEPLOY_PATH }}
-            git pull origin main
-            docker-compose down
-            docker-compose up -d --build
-            docker system prune -f
+
+            # Компоуз-файл берём из релизного тега, а не из ветки main
+            git fetch --tags origin
+            git checkout ${{ github.ref_name }}
+
+            if [ -n "$GHCR_TOKEN" ]; then
+              echo "$GHCR_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            fi
+
+            export IMAGE_REPO=$(echo "${{ env.REGISTRY }}/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+            export IMAGE_TAG=${{ github.ref_name }}
+
+            # Деплой готовыми образами из GHCR — без пересборки на сервере
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker image prune -f

@@ -1,9 +1,6 @@
 from typing import Optional
 from datetime import datetime, timezone
 
-def _utcnow():
-    return datetime.now(timezone.utc).replace(tzinfo=None)
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -18,6 +15,10 @@ from app.schemas.rentals import RentalOut
 from app.services.audit_service import log_action
 
 router = APIRouter()
+
+
+def _utcnow():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class StartRentalRequest(BaseModel):

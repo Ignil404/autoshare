@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
-from app.core.database import SessionLocal
 from app.models.bookings import Booking
 from app.models.cars import Car
 from app.services.audit_service import log_action
