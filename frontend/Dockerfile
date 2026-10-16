@@ -20,6 +20,10 @@ WORKDIR /app
 COPY --from=server /app/.output ./.output
 # Адрес бэкенда для проксирования /api — можно переопределить переменной окружения
 ENV BACKEND_URL=http://app:8000
+# Render задаёт PORT=10000 и отдаёт весь трафик на этот порт — пусть это nginx.
+# Nitro держим на внутреннем3000, иначе он перехватит PORT и /api уйдёт ему.
+ENV PORT=80
+ENV NITRO_PORT=3000
 # nginx подставит ${BACKEND_URL} при старте контейнера (envsubst в штатном entrypoint)
 COPY nginx.conf /etc/nginx/templates/default.conf.template
 COPY start.sh /start.sh
