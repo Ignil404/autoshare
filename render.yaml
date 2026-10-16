@@ -1,0 +1,34 @@
+# Render Blueprint: разворачивает весь стек одним кликом (New → Blueprint).
+# Если идёшь ручным путём через дашборд — файл можно просто удалить.
+services:
+  - type: postgres
+    name: autoshare-db
+    plan: free
+    databaseName: autoshare
+    ipAllowList: [] # доступ только изнутри платформы
+
+  - type: web
+    name: autoshare-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: autoshare-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+
+  - type: web
+    name: autoshare-frontend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    envVars:
+      # бэкенд и фронт живут отдельно — /api проксируется nginx на этот адрес
+      - key: BACKEND_URL
+        value: https://autoshare-api.onrender.com

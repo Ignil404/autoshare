@@ -18,7 +18,10 @@ FROM nginx:stable-alpine
 RUN apk add --no-cache nodejs
 WORKDIR /app
 COPY --from=server /app/.output ./.output
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Адрес бэкенда для проксирования /api — можно переопределить переменной окружения
+ENV BACKEND_URL=http://app:8000
+# nginx подставит ${BACKEND_URL} при старте контейнера (envsubst в штатном entrypoint)
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 EXPOSE 80
